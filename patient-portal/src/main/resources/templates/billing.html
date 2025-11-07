@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - Care Sync Patient Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <i class="fas fa-heartbeat me-2"></i>
+            Care Sync - Patient Portal
+        </a>
+        <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-1"></i>
+                    Welcome, <span sec:authentication="name">User</span>
+                </span>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="list-group list-group-flush">
+                    <a href="/dashboard" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="/appointments" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-check me-2"></i>Appointments
+                    </a>
+                    <a href="/medical-records" class="list-group-item list-group-item-action">
+                        <i class="fas fa-file-medical me-2"></i>Medical Records
+                    </a>
+                    <a href="/prescriptions" class="list-group-item list-group-item-action">
+                        <i class="fas fa-prescription me-2"></i>Prescriptions
+                    </a>
+                    <a href="/billing" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-receipt me-2"></i>Billing
+                    </a>
+                    <a href="/profile" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user me-2"></i>Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2><i class="fas fa-receipt me-2 text-info"></i>Billing & Payments</h2>
+                            <p class="text-muted mb-0">View your bills, make payments, and manage insurance</p>
+                        </div>
+                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#makePaymentModal">
+                            <i class="fas fa-credit-card me-2"></i>Make Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                            <h4>$2,450</h4>
+                            <p class="mb-0">Total Balance</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <h4>$1,200</h4>
+                            <p class="mb-0">Paid This Year</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <h4>$850</h4>
+                            <p class="mb-0">Pending Insurance</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <h4>$400</h4>
+                            <p class="mb-0">Due Now</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Tabs -->
+            <div class="row">
+                <div class="col-12">
+                    <ul class="nav nav-tabs" id="billingTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="outstanding-tab" data-bs-toggle="tab" data-bs-target="#outstanding" type="button" role="tab">
+                                <i class="fas fa-clock me-2"></i>Outstanding Bills
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab">
+                                <i class="fas fa-check me-2"></i>Payment History
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="insurance-tab" data-bs-toggle="tab" data-bs-target="#insurance" type="button" role="tab">
+                                <i class="fas fa-shield-alt me-2"></i>Insurance Claims
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-3" id="billingTabsContent">
+                        <!-- Outstanding Bills -->
+                        <div class="tab-pane fade show active" id="outstanding" role="tabpanel">
+                            <div class="bills-list">
+                                <div class="bill-card overdue">
+                                    <div class="bill-header">
+                                        <h5>Cardiology Consultation</h5>
+                                        <span class="bill-status overdue">Overdue</span>
+                                    </div>
+                                    <div class="bill-details">
+                                        <p><strong>Service Date:</strong> December 28, 2024</p>
+                                        <p><strong>Provider:</strong> Dr. Sarah Johnson</p>
+                                        <p><strong>Description:</strong> Office visit and ECG</p>
+                                    </div>
+                                    <div class="bill-amount">
+                                        <div class="amount">$250.00</div>
+                                        <div class="due-date">Due: Dec 30, 2024</div>
+                                    </div>
+                                    <div class="bill-actions">
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-credit-card me-1"></i>Pay Now
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-file-invoice me-1"></i>View Details
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="bill-card due">
+                                    <div class="bill-header">
+                                        <h5>Laboratory Tests</h5>
+                                        <span class="bill-status due">Due Soon</span>
+                                    </div>
+                                    <div class="bill-details">
+                                        <p><strong>Service Date:</strong> January 3, 2025</p>
+                                        <p><strong>Provider:</strong> Lab Corp</p>
+                                        <p><strong>Description:</strong> Blood work and analysis</p>
+                                    </div>
+                                    <div class="bill-amount">
+                                        <div class="amount">$150.00</div>
+                                        <div class="due-date">Due: Jan 15, 2025</div>
+                                    </div>
+                                    <div class="bill-actions">
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-credit-card me-1"></i>Pay Now
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-file-invoice me-1"></i>View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment History -->
+                        <div class="tab-pane fade" id="paid" role="tabpanel">
+                            <div class="bills-list">
+                                <div class="bill-card paid">
+                                    <div class="bill-header">
+                                        <h5>Annual Physical</h5>
+                                        <span class="bill-status paid">Paid</span>
+                                    </div>
+                                    <div class="bill-details">
+                                        <p><strong>Service Date:</strong> December 20, 2024</p>
+                                        <p><strong>Provider:</strong> Dr. Lisa Thompson</p>
+                                        <p><strong>Payment Date:</strong> December 22, 2024</p>
+                                    </div>
+                                    <div class="bill-amount">
+                                        <div class="amount">$180.00</div>
+                                        <div class="due-date">Paid via Credit Card</div>
+                                    </div>
+                                    <div class="bill-actions">
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-receipt me-1"></i>View Receipt
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Insurance Claims -->
+                        <div class="tab-pane fade" id="insurance" role="tabpanel">
+                            <div class="bills-list">
+                                <div class="bill-card pending">
+                                    <div class="bill-header">
+                                        <h5>MRI Scan</h5>
+                                        <span class="bill-status pending">Pending</span>
+                                    </div>
+                                    <div class="bill-details">
+                                        <p><strong>Service Date:</strong> December 28, 2024</p>
+                                        <p><strong>Provider:</strong> Radiology Dept</p>
+                                        <p><strong>Insurance:</strong> Blue Cross Blue Shield</p>
+                                        <p><strong>Claim Status:</strong> Under Review</p>
+                                    </div>
+                                    <div class="bill-amount">
+                                        <div class="amount">$850.00</div>
+                                        <div class="due-date">Estimated Coverage: 80%</div>
+                                    </div>
+                                    <div class="bill-actions">
+                                        <button class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-info-circle me-1"></i>Claim Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Make Payment Modal -->
+<div class="modal fade" id="makePaymentModal" tabindex="-1" aria-labelledby="makePaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="makePaymentModalLabel">
+                    <i class="fas fa-credit-card me-2"></i>Make Payment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Select Bill to Pay</label>
+                        <select class="form-select" required>
+                            <option value="">Choose bill</option>
+                            <option value="cardiology">Cardiology Consultation - $250.00</option>
+                            <option value="lab">Laboratory Tests - $150.00</option>
+                            <option value="full">Pay Full Balance - $400.00</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Payment Amount ($)</label>
+                        <input type="number" class="form-control" placeholder="Enter amount" min="1" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-select" required>
+                            <option value="">Select payment method</option>
+                            <option value="credit">Credit Card</option>
+                            <option value="debit">Debit Card</option>
+                            <option value="bank">Bank Transfer</option>
+                            <option value="paypal">PayPal</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-lock me-2"></i>Secure Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Payment form handling
+        const paymentForm = document.getElementById('paymentForm');
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Payment processed successfully!');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('makePaymentModal'));
+                modal.hide();
+                this.reset();
+            });
+        }
+
+        // Bill card actions
+        document.querySelectorAll('.bill-actions .btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const action = this.querySelector('i').className;
+                const bill = this.closest('.bill-card').querySelector('h5').textContent;
+
+                if (action.includes('fa-credit-card')) {
+                    alert(`Processing payment for: ${bill}`);
+                } else if (action.includes('fa-file-invoice')) {
+                    alert(`Showing details for: ${bill}`);
+                } else if (action.includes('fa-receipt')) {
+                    alert(`Showing receipt for: ${bill}`);
+                } else if (action.includes('fa-info-circle')) {
+                    alert(`Showing claim details for: ${bill}`);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

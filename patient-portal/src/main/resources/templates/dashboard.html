@@ -1,155 +1,1538 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.th3ymeleaf.org/extras/spring-security">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Care Sync Patient Portal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/css/style.css" rel="stylesheet">
+    <title>Care Sync - Patient Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2a7de1;
+            --primary-dark: #1c5fb0;
+            --secondary: #00c6ab;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--box-shadow);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-links li {
+            padding: 12px 20px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links li.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .user-profile {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn i {
+            margin-right: 10px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome h2 {
+            font-size: 24px;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .welcome p {
+            color: var(--gray);
+        }
+
+        .date-display {
+            background-color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            font-weight: 500;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .health-score .card-icon {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+
+        .appointments .card-icon {
+            background-color: rgba(42, 125, 225, 0.2);
+            color: var(--primary);
+        }
+
+        .medications .card-icon {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+
+        .records .card-icon {
+            background-color: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .card-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        /* Content Sections */
+        .content-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .view-all {
+            color: var(--primary);
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        /* Vital Signs */
+        .vital-signs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .vital {
+            text-align: center;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+        }
+
+        .vital-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0 5px;
+        }
+
+        .vital-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .vital-status {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .status-normal {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+
+        /* Appointments */
+        .appointment {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .appointment:last-child {
+            margin-bottom: 0;
+        }
+
+        .appointment-date {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: var(--border-radius);
+            margin-right: 15px;
+            min-width: 70px;
+        }
+
+        .appointment-day {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .appointment-time {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .appointment-details h4 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .appointment-details p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        /* Page Styles */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Appointments Page */
+        .appointments-list {
+            margin-top: 20px;
+        }
+
+        .appointment-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .appointment-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .appointment-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-upcoming {
+            background-color: rgba(42, 125, 225, 0.2);
+            color: var(--primary);
+        }
+
+        .status-completed {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+
+        .status-cancelled {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .appointment-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .appointment-detail {
+            display: flex;
+            align-items: center;
+        }
+
+        .appointment-detail i {
+            margin-right: 10px;
+            color: var(--primary);
+            width: 20px;
+        }
+
+        /* Profile Page Styles */
+        .profile-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            max-width: 800px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .profile-info h2 {
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: var(--gray);
+        }
+
+        .edit-profile-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            margin-left: auto;
+        }
+
+        .edit-profile-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .detail-group {
+            margin-bottom: 20px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        /* Medical Records Page */
+        .records-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .record-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .record-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .record-date {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .record-details {
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .record-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Prescriptions Page */
+        .prescription-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--warning);
+        }
+
+        .prescription-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .prescription-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .prescription-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .prescription-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Billing Page */
+        .billing-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--success);
+        }
+
+        .billing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .billing-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .billing-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .billing-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-paid {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+
+        .status-overdue {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .billing-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .content-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-details {
+                grid-template-columns: 1fr;
+            }
+
+            .appointment-details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .prescription-details {
+                grid-template-columns: 1fr;
+            }
+
+            .billing-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .nav-links {
+                display: flex;
+                overflow-x: auto;
+            }
+
+            .nav-links li {
+                flex-shrink: 0;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+
+            .edit-profile-btn {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="#">
-            <i class="fas fa-heartbeat me-2"></i>
-            Care Sync - Patient Portal
-        </a>
-        <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">
-                    Welcome, <span sec:authentication="name">User</span>
-                </span>
-            <form th:action="@{/logout}" method="post" class="d-inline">
-                <button type="submit" class="btn btn-outline-light btn-sm">
-                    <i class="fas fa-sign-out-alt me-1"></i>Logout
-                </button>
-            </form>
+<!-- Sidebar Navigation -->
+<div class="sidebar">
+    <div class="logo">
+        <i class="fas fa-heartbeat"></i>
+        <h1>Care Sync</h1>
+    </div>
+    <ul class="nav-links">
+        <li class="active" data-page="dashboard">
+            <i class="fas fa-th-large"></i>
+            <span>Dashboard</span>
+        </li>
+        <li data-page="appointments">
+            <i class="fas fa-calendar-check"></i>
+            <span>Appointments</span>
+        </li>
+        <li data-page="records">
+            <i class="fas fa-file-medical"></i>
+            <span>Medical Records</span>
+        </li>
+        <li data-page="prescriptions">
+            <i class="fas fa-prescription-bottle-alt"></i>
+            <span>Prescriptions</span>
+        </li>
+        <li data-page="billing">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Billing</span>
+        </li>
+        <li data-page="profile">
+            <i class="fas fa-user-circle"></i>
+            <span>Profile</span>
+        </li>
+    </ul>
+    <div class="user-profile" data-page="profile">
+        <div class="user-avatar" id="sidebar-avatar">JD</div>
+        <div>
+            <div class="user-name" id="sidebar-name">John Doe</div>
+            <div class="user-role">Patient</div>
         </div>
     </div>
-</nav>
+    <button class="logout-btn" id="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+</div>
 
-<div class="container-fluid mt-4">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3">
-            <div class="sidebar">
-                <div class="list-group list-group-flush">
-                    <a href="/dashboard" class="list-group-item list-group-item-action active">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                    </a>
-                    <a href="/appointments" class="list-group-item list-group-item-action">
-                        <i class="fas fa-calendar-check me-2"></i>Appointments
-                    </a>
-                    <a href="/medical-records" class="list-group-item list-group-item-action">
-                        <i class="fas fa-file-medical me-2"></i>Medical Records
-                    </a>
-                    <a href="/prescriptions" class="list-group-item list-group-item-action">
-                        <i class="fas fa-prescription me-2"></i>Prescriptions
-                    </a>
-                    <a href="/billing" class="list-group-item list-group-item-action">
-                        <i class="fas fa-receipt me-2"></i>Billing
-                    </a>
-                    <a href="/profile" class="list-group-item list-group-item-action">
-                        <i class="fas fa-user me-2"></i>Profile
-                    </a>
-                </div>
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Dashboard Page -->
+    <div class="page active" id="dashboard-page">
+        <div class="header">
+            <div class="welcome">
+                <h2>Welcome to your Health Dashboard</h2>
+                <p>Monitor your health metrics and manage your healthcare journey</p>
+            </div>
+            <div class="date-display">
+                <i class="far fa-calendar-alt"></i>
+                <span id="current-date">Monday, October 16, 2023</span>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9">
-            <div class="container-fluid">
-                <!-- Welcome Message -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h3 th:text="${welcomeMessage}">Welcome to your Patient Dashboard</h3>
-                                <p class="text-muted mb-0">Manage your healthcare journey efficiently</p>
-                            </div>
+        <!-- Dashboard Cards -->
+        <div class="dashboard-cards">
+            <div class="card health-score" data-page="health-score">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+                <div class="card-value">85%</div>
+                <div class="card-label">Health Score</div>
+            </div>
+            <div class="card appointments" data-page="appointments">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+                <div class="card-value">3</div>
+                <div class="card-label">Upcoming Appointments</div>
+            </div>
+            <div class="card medications" data-page="prescriptions">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                </div>
+                <div class="card-value">5</div>
+                <div class="card-label">Active Medications</div>
+            </div>
+            <div class="card records" data-page="records">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                </div>
+                <div class="card-value">12</div>
+                <div class="card-label">Medical Records</div>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="content-sections">
+            <!-- Vital Signs Section -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Vital Signs</div>
+                    <div class="view-all" data-page="vitals">View All</div>
+                </div>
+                <div class="vital-signs">
+                    <div class="vital">
+                        <i class="fas fa-heartbeat" style="color: #e74c3c;"></i>
+                        <div class="vital-value">72 BPM</div>
+                        <div class="vital-label">Heart Rate</div>
+                        <div class="vital-status status-normal">Normal</div>
+                    </div>
+                    <div class="vital">
+                        <i class="fas fa-lungs" style="color: #3498db;"></i>
+                        <div class="vital-value">98%</div>
+                        <div class="vital-label">Oxygen Saturation</div>
+                        <div class="vital-status status-normal">Normal</div>
+                    </div>
+                    <div class="vital">
+                        <i class="fas fa-temperature-high" style="color: #e67e22;"></i>
+                        <div class="vital-value">98.6°F</div>
+                        <div class="vital-label">Body Temperature</div>
+                        <div class="vital-status status-normal">Normal</div>
+                    </div>
+                    <div class="vital">
+                        <i class="fas fa-tachometer-alt" style="color: #9b59b6;"></i>
+                        <div class="vital-value">120/80</div>
+                        <div class="vital-label">Blood Pressure</div>
+                        <div class="vital-status status-normal">Normal</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Appointments Section -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Upcoming Appointments</div>
+                    <div class="view-all" data-page="appointments">View All</div>
+                </div>
+                <div class="appointment">
+                    <div class="appointment-date">
+                        <div class="appointment-day">Today</div>
+                        <div class="appointment-time">10:00 AM</div>
+                    </div>
+                    <div class="appointment-details">
+                        <h4>Dr. Sarah Johnson</h4>
+                        <p>Cardiology • Regular Checkup</p>
+                    </div>
+                </div>
+                <div class="appointment">
+                    <div class="appointment-date">
+                        <div class="appointment-day">Wed</div>
+                        <div class="appointment-time">2:30 PM</div>
+                    </div>
+                    <div class="appointment-details">
+                        <h4>Dr. Michael Chen</h4>
+                        <p>Dermatology • Skin Consultation</p>
+                    </div>
+                </div>
+                <div class="appointment">
+                    <div class="appointment-date">
+                        <div class="appointment-day">Fri</div>
+                        <div class="appointment-time">11:15 AM</div>
+                    </div>
+                    <div class="appointment-details">
+                        <h4>Dr. Emily Rodriguez</h4>
+                        <p>Physical Therapy • Follow-up</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments Page -->
+    <div class="page" id="appointments-page">
+        <div class="header">
+            <div class="welcome">
+                <h2>Appointments</h2>
+                <p>Manage and view your medical appointments</p>
+            </div>
+            <div class="date-display">
+                <i class="far fa-calendar-alt"></i>
+                <span id="appointments-date">Monday, October 16, 2023</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">All Appointments</div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Appointment
+                </button>
+            </div>
+            <div class="appointments-list">
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-title">Cardiology Checkup</div>
+                        <div class="appointment-status status-upcoming">Upcoming</div>
+                    </div>
+                    <div class="appointment-details-grid">
+                        <div class="appointment-detail">
+                            <i class="fas fa-user-md"></i>
+                            <span>Dr. Sarah Johnson</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-calendar"></i>
+                            <span>Today, 10:00 AM</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Cardiology Center, Room 205</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Regular Checkup</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Quick Stats -->
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="card stats-card bg-primary text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <i class="fas fa-calendar fa-2x mb-2"></i>
-                                        <h5>Upcoming Appointments</h5>
-                                        <h3 th:text="${upcomingAppointments}">0</h3>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-chevron-right fa-2x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-title">Dermatology Consultation</div>
+                        <div class="appointment-status status-upcoming">Upcoming</div>
                     </div>
-
-                    <div class="col-md-4 mb-4">
-                        <div class="card stats-card bg-success text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <i class="fas fa-file-medical fa-2x mb-2"></i>
-                                        <h5>Medical Records</h5>
-                                        <h3 th:text="${recentRecords}">0</h3>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-chevron-right fa-2x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="appointment-details-grid">
+                        <div class="appointment-detail">
+                            <i class="fas fa-user-md"></i>
+                            <span>Dr. Michael Chen</span>
                         </div>
-                    </div>
-
-                    <div class="col-md-4 mb-4">
-                        <div class="card stats-card bg-warning text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <i class="fas fa-receipt fa-2x mb-2"></i>
-                                        <h5>Pending Payments</h5>
-                                        <h3 th:text="${pendingPayments}">0</h3>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-chevron-right fa-2x opacity-50"></i>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-calendar"></i>
+                            <span>Wednesday, 2:30 PM</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Skin Care Clinic, Room 102</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Skin Consultation</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-history me-2"></i>Recent Activity
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    Your dashboard is ready! More features coming soon.
-                                </div>
-                                <p class="text-muted">Appointments, medical records, prescriptions, and billing features will be available here.</p>
-                            </div>
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-title">Physical Therapy</div>
+                        <div class="appointment-status status-completed">Completed</div>
+                    </div>
+                    <div class="appointment-details-grid">
+                        <div class="appointment-detail">
+                            <i class="fas fa-user-md"></i>
+                            <span>Dr. Emily Rodriguez</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-calendar"></i>
+                            <span>October 10, 11:15 AM</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Rehabilitation Center, Gym 2</span>
+                        </div>
+                        <div class="appointment-detail">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Knee Rehabilitation</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Records Page -->
+    <div class="page" id="records-page">
+        <div class="header">
+            <div class="welcome">
+                <h2>Medical Records</h2>
+                <p>Access your medical history and test results</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">My Medical Records</div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-download"></i> Export Records
+                </button>
+            </div>
+            <div class="records-grid">
+                <div class="record-card">
+                    <div class="record-header">
+                        <div class="record-title">Blood Test Results</div>
+                        <div class="record-date">Oct 10, 2023</div>
+                    </div>
+                    <div class="record-details">
+                        Complete blood count and metabolic panel. All values within normal range.
+                    </div>
+                    <div class="record-actions">
+                        <button class="btn btn-primary">View</button>
+                        <button class="btn btn-secondary">Download</button>
+                    </div>
+                </div>
+
+                <div class="record-card">
+                    <div class="record-header">
+                        <div class="record-title">Cardiology Report</div>
+                        <div class="record-date">Sep 28, 2023</div>
+                    </div>
+                    <div class="record-details">
+                        ECG and stress test results. Normal cardiac function observed.
+                    </div>
+                    <div class="record-actions">
+                        <button class="btn btn-primary">View</button>
+                        <button class="btn btn-secondary">Download</button>
+                    </div>
+                </div>
+
+                <div class="record-card">
+                    <div class="record-header">
+                        <div class="record-title">X-Ray - Chest</div>
+                        <div class="record-date">Aug 15, 2023</div>
+                    </div>
+                    <div class="record-details">
+                        Routine chest X-ray. Clear lungs and normal heart size.
+                    </div>
+                    <div class="record-actions">
+                        <button class="btn btn-primary">View</button>
+                        <button class="btn btn-secondary">Download</button>
+                    </div>
+                </div>
+
+                <div class="record-card">
+                    <div class="record-header">
+                        <div class="record-title">Annual Physical</div>
+                        <div class="record-date">Jul 5, 2023</div>
+                    </div>
+                    <div class="record-details">
+                        Comprehensive physical examination report. Good overall health.
+                    </div>
+                    <div class="record-actions">
+                        <button class="btn btn-primary">View</button>
+                        <button class="btn btn-secondary">Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescriptions Page -->
+    <div class="page" id="prescriptions-page">
+        <div class="header">
+            <div class="welcome">
+                <h2>Prescriptions</h2>
+                <p>View and manage your medications</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">My Prescriptions</div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Request Refill
+                </button>
+            </div>
+            <div class="appointments-list">
+                <div class="prescription-card">
+                    <div class="prescription-header">
+                        <div class="prescription-title">Lisinopril</div>
+                        <div class="prescription-status status-active">Active</div>
+                    </div>
+                    <div class="prescription-details">
+                        <div><strong>Dosage:</strong> 10mg once daily</div>
+                        <div><strong>Prescribed:</strong> Dr. Sarah Johnson</div>
+                        <div><strong>Refills:</strong> 3 remaining</div>
+                        <div><strong>Expires:</strong> Dec 15, 2023</div>
+                    </div>
+                </div>
+
+                <div class="prescription-card">
+                    <div class="prescription-header">
+                        <div class="prescription-title">Atorvastatin</div>
+                        <div class="prescription-status status-active">Active</div>
+                    </div>
+                    <div class="prescription-details">
+                        <div><strong>Dosage:</strong> 20mg once daily</div>
+                        <div><strong>Prescribed:</strong> Dr. Sarah Johnson</div>
+                        <div><strong>Refills:</strong> 2 remaining</div>
+                        <div><strong>Expires:</strong> Jan 5, 2024</div>
+                    </div>
+                </div>
+
+                <div class="prescription-card">
+                    <div class="prescription-header">
+                        <div class="prescription-title">Metformin</div>
+                        <div class="prescription-status status-completed">Completed</div>
+                    </div>
+                    <div class="prescription-details">
+                        <div><strong>Dosage:</strong> 500mg twice daily</div>
+                        <div><strong>Prescribed:</strong> Dr. Michael Chen</div>
+                        <div><strong>Refills:</strong> 0 remaining</div>
+                        <div><strong>Expired:</strong> Sep 30, 2023</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Billing Page -->
+    <div class="page" id="billing-page">
+        <div class="header">
+            <div class="welcome">
+                <h2>Billing</h2>
+                <p>View your bills and payment history</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Billing Statements</div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-credit-card"></i> Make Payment
+                </button>
+            </div>
+            <div class="appointments-list">
+                <div class="billing-card">
+                    <div class="billing-header">
+                        <div class="billing-title">Cardiology Consultation</div>
+                        <div class="billing-amount">$150.00</div>
+                    </div>
+                    <div class="billing-details">
+                        <div><strong>Date:</strong> Oct 10, 2023</div>
+                        <div><strong>Provider:</strong> Dr. Sarah Johnson</div>
+                        <div><strong>Status:</strong> <span class="billing-status status-paid">Paid</span></div>
+                        <div><strong>Payment Date:</strong> Oct 12, 2023</div>
+                    </div>
+                </div>
+
+                <div class="billing-card">
+                    <div class="billing-header">
+                        <div class="billing-title">Laboratory Tests</div>
+                        <div class="billing-amount">$85.50</div>
+                    </div>
+                    <div class="billing-details">
+                        <div><strong>Date:</strong> Oct 5, 2023</div>
+                        <div><strong>Provider:</strong> City Lab</div>
+                        <div><strong>Status:</strong> <span class="billing-status status-pending">Pending</span></div>
+                        <div><strong>Due Date:</strong> Nov 5, 2023</div>
+                    </div>
+                </div>
+
+                <div class="billing-card">
+                    <div class="billing-header">
+                        <div class="billing-title">Annual Physical</div>
+                        <div class="billing-amount">$200.00</div>
+                    </div>
+                    <div class="billing-details">
+                        <div><strong>Date:</strong> Sep 15, 2023</div>
+                        <div><strong>Provider:</strong> Primary Care</div>
+                        <div><strong>Status:</strong> <span class="billing-status status-overdue">Overdue</span></div>
+                        <div><strong>Due Date:</strong> Oct 15, 2023</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Page -->
+    <div class="page" id="profile-page">
+        <div class="header">
+            <div class="welcome">
+                <h2>My Profile</h2>
+                <p>Manage your personal information and account settings</p>
+            </div>
+        </div>
+
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profile-avatar">JD</div>
+                <div class="profile-info">
+                    <h2 id="profile-name">John Doe</h2>
+                    <p>Patient since 2020</p>
+                </div>
+                <button class="edit-profile-btn" id="edit-profile-btn">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+
+            <div class="profile-details" id="profile-view">
+                <div class="detail-group">
+                    <div class="detail-label">Full Name</div>
+                    <div class="detail-value" id="view-name">John Doe</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Email Address</div>
+                    <div class="detail-value" id="view-email">john.doe@example.com</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Phone Number</div>
+                    <div class="detail-value" id="view-phone">(555) 123-4567</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Date of Birth</div>
+                    <div class="detail-value" id="view-dob">January 15, 1985</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Gender</div>
+                    <div class="detail-value" id="view-gender">Male</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Blood Type</div>
+                    <div class="detail-value" id="view-blood">O+</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Emergency Contact</div>
+                    <div class="detail-value" id="view-emergency">Jane Doe (555) 987-6543</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label">Primary Physician</div>
+                    <div class="detail-value" id="view-physician">Dr. Sarah Johnson</div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Edit Profile Modal -->
+<div class="modal" id="edit-profile-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Profile</h3>
+            <button class="close-modal" id="close-modal">&times;</button>
+        </div>
+        <form id="edit-profile-form">
+            <div class="form-group">
+                <label class="form-label" for="edit-name">Full Name</label>
+                <input type="text" class="form-input" id="edit-name" value="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-email">Email Address</label>
+                <input type="email" class="form-input" id="edit-email" value="john.doe@example.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-phone">Phone Number</label>
+                <input type="tel" class="form-input" id="edit-phone" value="(555) 123-4567" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-dob">Date of Birth</label>
+                <input type="text" class="form-input" id="edit-dob" value="January 15, 1985" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-gender">Gender</label>
+                <select class="form-input" id="edit-gender" required>
+                    <option value="Male" selected>Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-blood">Blood Type</label>
+                <select class="form-input" id="edit-blood" required>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+" selected>O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-emergency">Emergency Contact</label>
+                <input type="text" class="form-input" id="edit-emergency" value="Jane Doe (555) 987-6543" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="edit-physician">Primary Physician</label>
+                <input type="text" class="form-input" id="edit-physician" value="Dr. Sarah Johnson" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Set current date
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const currentDate = new Date().toLocaleDateString('en-US', options);
+    document.getElementById('current-date').textContent = currentDate;
+    document.getElementById('appointments-date').textContent = currentDate;
+
+    // Navigation functionality
+    document.querySelectorAll('.nav-links li, .user-profile, .card, .view-all').forEach(element => {
+        element.addEventListener('click', function() {
+            const page = this.getAttribute('data-page');
+            if (page) {
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+
+                // Show selected page
+                document.getElementById(`${page}-page`).classList.add('active');
+
+                // Update active nav item
+                document.querySelectorAll('.nav-links li').forEach(li => {
+                    li.classList.remove('active');
+                });
+
+                if (this.classList.contains('nav-links')) {
+                    this.classList.add('active');
+                } else {
+                    // Find the corresponding nav item and activate it
+                    const navItem = document.querySelector(`.nav-links li[data-page="${page}"]`);
+                    if (navItem) {
+                        navItem.classList.add('active');
+                    }
+                }
+            }
+        });
+    });
+
+    // Profile editing functionality
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const editProfileModal = document.getElementById('edit-profile-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const editProfileForm = document.getElementById('edit-profile-form');
+
+    editProfileBtn.addEventListener('click', function() {
+        editProfileModal.classList.add('active');
+    });
+
+    closeModalBtn.addEventListener('click', function() {
+        editProfileModal.classList.remove('active');
+    });
+
+    cancelEditBtn.addEventListener('click', function() {
+        editProfileModal.classList.remove('active');
+    });
+
+    editProfileForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Get form values
+        const name = document.getElementById('edit-name').value;
+        const email = document.getElementById('edit-email').value;
+        const phone = document.getElementById('edit-phone').value;
+        const dob = document.getElementById('edit-dob').value;
+        const gender = document.getElementById('edit-gender').value;
+        const blood = document.getElementById('edit-blood').value;
+        const emergency = document.getElementById('edit-emergency').value;
+        const physician = document.getElementById('edit-physician').value;
+
+        // Update view with new values
+        document.getElementById('view-name').textContent = name;
+        document.getElementById('view-email').textContent = email;
+        document.getElementById('view-phone').textContent = phone;
+        document.getElementById('view-dob').textContent = dob;
+        document.getElementById('view-gender').textContent = gender;
+        document.getElementById('view-blood').textContent = blood;
+        document.getElementById('view-emergency').textContent = emergency;
+        document.getElementById('view-physician').textContent = physician;
+
+        // Update profile header
+        document.getElementById('profile-name').textContent = name;
+
+        // Update sidebar
+        document.getElementById('sidebar-name').textContent = name;
+
+        // Update avatar initials
+        const initials = name.split(' ').map(n => n[0]).join('');
+        document.getElementById('profile-avatar').textContent = initials;
+        document.getElementById('sidebar-avatar').textContent = initials;
+
+        // Close modal
+        editProfileModal.classList.remove('active');
+
+        // Show success message
+        alert('Profile updated successfully!');
+    });
+
+    // Logout functionality
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to logout?')) {
+            alert('You have been logged out successfully!');
+            // In a real application, this would redirect to the login page
+            // window.location.href = 'login.html';
+        }
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+        if (e.target === editProfileModal) {
+            editProfileModal.classList.remove('active');
+        }
+    });
+</script>
 </body>
 </html>
